@@ -50,7 +50,14 @@ tr:nth-child(even){background:#0d1117}
 .btn.danger{color:var(--red)}.btn.danger:hover{border-color:var(--red)}
 .legend{font-size:0.75em;color:var(--dim);margin:8px 0}
 .legend span{margin-right:12px}
-@media(max-width:600px){body{padding:10px}table{font-size:0.7em;min-width:600px}th,td{padding:5px 4px}}
+.chart-row{display:flex;gap:14px;margin:12px 0;flex-wrap:wrap;justify-content:center}
+.chart-item{flex:1;min-width:120px;max-width:180px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px 10px;text-align:center}
+.chart-item svg{display:block;margin:0 auto}
+.chart-item .sub-name{font-size:0.78em;color:var(--dim);margin-top:6px}
+.chart-item .sub-pct{font-size:0.72em;color:var(--dim)}
+.chart-ring-bg{fill:none;stroke:#21262d}
+.chart-ring-fg{fill:none;stroke-linecap:round;transition:stroke-dashoffset .5s}
+@media(max-width:600px){body{padding:10px}table{font-size:0.7em;min-width:600px}th,td{padding:5px 4px}.chart-item{min-width:70px;padding:10px 4px}}
 </style>
 </head>
 <body>
@@ -72,6 +79,13 @@ tr:nth-child(even){background:#0d1117}
   <div class="sc"><div class="n" style="color:var(--orange)">78</div><div class="l">英语二</div></div>
   <div class="sc"><div class="n" style="color:var(--blue)">77</div><div class="l">数学二</div></div>
   <div class="sc"><div class="n" style="color:var(--green)">115</div><div class="l">408</div></div>
+</div>
+
+<div class="chart-row" id="chart-row">
+  <div class="chart-item" id="chart-math"><svg viewBox="0 0 100 100"><circle class="chart-ring-bg" cx="50" cy="50" r="38" stroke-width="10" fill="none"/><circle class="chart-ring-fg" id="ring-math" cx="50" cy="50" r="38" stroke-width="10" stroke="var(--blue)" fill="none" stroke-dasharray="238.76" stroke-dashoffset="238.76" transform="rotate(-90 50 50)"/><text x="50" y="46" text-anchor="middle" fill="#c9d1d9" font-size="14" font-weight="bold" id="pct-math">0%</text><text x="50" y="62" text-anchor="middle" fill="var(--dim)" font-size="9" id="cnt-math">0/0</text></svg><div class="sub-name">数学二</div></div>
+  <div class="chart-item" id="chart-408"><svg viewBox="0 0 100 100"><circle class="chart-ring-bg" cx="50" cy="50" r="38" stroke-width="10" fill="none"/><circle class="chart-ring-fg" id="ring-408" cx="50" cy="50" r="38" stroke-width="10" stroke="var(--green)" fill="none" stroke-dasharray="238.76" stroke-dashoffset="238.76" transform="rotate(-90 50 50)"/><text x="50" y="46" text-anchor="middle" fill="#c9d1d9" font-size="14" font-weight="bold" id="pct-408">0%</text><text x="50" y="62" text-anchor="middle" fill="var(--dim)" font-size="9" id="cnt-408">0/0</text></svg><div class="sub-name">408</div></div>
+  <div class="chart-item" id="chart-en"><svg viewBox="0 0 100 100"><circle class="chart-ring-bg" cx="50" cy="50" r="38" stroke-width="10" fill="none"/><circle class="chart-ring-fg" id="ring-en" cx="50" cy="50" r="38" stroke-width="10" stroke="var(--orange)" fill="none" stroke-dasharray="238.76" stroke-dashoffset="238.76" transform="rotate(-90 50 50)"/><text x="50" y="46" text-anchor="middle" fill="#c9d1d9" font-size="14" font-weight="bold" id="pct-en">0%</text><text x="50" y="62" text-anchor="middle" fill="var(--dim)" font-size="9" id="cnt-en">0/0</text></svg><div class="sub-name">英语二</div></div>
+  <div class="chart-item" id="chart-pol"><svg viewBox="0 0 100 100"><circle class="chart-ring-bg" cx="50" cy="50" r="38" stroke-width="10" fill="none"/><circle class="chart-ring-fg" id="ring-pol" cx="50" cy="50" r="38" stroke-width="10" stroke="#f778ba" fill="none" stroke-dasharray="238.76" stroke-dashoffset="238.76" transform="rotate(-90 50 50)"/><text x="50" y="46" text-anchor="middle" fill="#c9d1d9" font-size="14" font-weight="bold" id="pct-pol">0%</text><text x="50" y="62" text-anchor="middle" fill="var(--dim)" font-size="9" id="cnt-pol">0/0</text></svg><div class="sub-name">政治</div></div>
 </div>
 
 <div class="quote-box" id="quote"><span id="quote-text"></span><span class="author" id="quote-author"></span></div>
@@ -446,6 +460,19 @@ function updateProgress(){
   document.getElementById('done-text').textContent = `已完成 ${count} / ${total} 个任务`;
   document.getElementById('pct-text').textContent = pct+'%';
   document.getElementById('pfill').style.width = pct+'%';
+
+  const C = 238.76;
+  const subs = {math:{col:1,id:'math',color:'var(--blue)'},'408':{col:2,id:'408',color:'var(--green)'},en:{col:3,id:'en',color:'var(--orange)'},pol:{col:4,id:'pol',color:'#f778ba'}};
+  for(const [,s] of Object.entries(subs)){
+    const subAll = document.querySelectorAll('input[id$="_'+s.col+'"]');
+    const subDone = document.querySelectorAll('input[id$="_'+s.col+'"]:checked');
+    const subTotal = subAll.length, subCount = subDone.length;
+    const subPct = subTotal ? Math.round(subCount/subTotal*100) : 0;
+    document.getElementById('pct-'+s.id).textContent = subPct+'%';
+    document.getElementById('cnt-'+s.id).textContent = subCount+'/'+subTotal;
+    document.getElementById('ring-'+s.id).style.strokeDashoffset = C - (C*subPct/100);
+  }
+
   const rem = document.getElementById('reminder');
   const todayTr = document.querySelector('.today-row');
   if(todayTr){
