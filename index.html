@@ -336,7 +336,7 @@ function render(){
       const isToday = d[0].includes(fmtDate(new Date()));
       html += `<tr class="task-row${isToday?' today-row':''}" id="tr_${did}"><td>${d[0]}</td>`;
       for(let i=1;i<=4;i++){
-        html += `<td><input type="checkbox" id="${did}_${i}" onchange="onCheck()"><label><span class="cb">✓</span><span class="task-text clickable" ondblclick="editTask(this,'${did}_${i}')" title="双击编辑">${d[i]||'—'}</span></label></td>`;
+        html += `<td><input type="checkbox" id="${did}_${i}" onchange="onCheck()"><label for="${did}_${i}"><span class="cb">✓</span><span class="task-text clickable" ondblclick="editTask(this,'${did}_${i}')" title="双击编辑">${d[i]||'—'}</span></label></td>`;
       }
       html += '</tr>';
     });
