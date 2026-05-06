@@ -462,25 +462,61 @@ function updateProgress(){
   document.getElementById('pfill').style.width = pct+'%';
 
   const C = 238.76;
-  const subs = {math:{col:1,id:'math',color:'var(--blue)'},'408':{col:2,id:'408',color:'var(--green)'},en:{col:3,id:'en',color:'var(--orange)'},pol:{col:4,id:'pol',color:'#f778ba'}};
-  for(const [,s] of Object.entries(subs)){
-    const allCb = document.querySelectorAll('input[id$="_'+s.col+'"]');
-    const weeksMap = {};
+  const chapters = {
+    math:[
+      {n:'初等数学',re:/有理数|因式分解|一元|二次函数|分式方程|AM.*PM.*综合/},
+      {n:'集合函数',re:/集合|定义域|单调性|奇偶性/},
+      {n:'初等函数',re:/幂函数|指数函数|对数|三角|弧度|诱导|和差角|函数图像变换/},
+      {n:'极限',re:/极限|无穷小|收敛|连续|间断|夹逼/},
+      {n:'导数',re:/导数|求导|链式法则|隐函数|参数方程|对数求导法/},
+      {n:'导数应用',re:/中值定理|洛必达|极值|凹凸|渐近线|拐点/},
+      {n:'积分',re:/不定积分|凑微分|换元|分部积分|定积分|反常|面积|体积|牛莱/},
+      {n:'线代+多元',re:/多元|偏导|全微分|拉格朗日|线代|行列式|矩阵|向量|特征值|逆矩阵|伴随矩阵|秩|线性方程组/},
+      {n:'真题冲刺',re:/真题|李林|公式.*默|错题.*回顾|笔记|全刷标记|标记题|薄弱章|数二.*限时|数学公式/},
+    ],
+    '408':[
+      {n:'DS绪论+线性表',re:/什么是数据|时间复杂度|空间复杂度|绪论|顺序表/},
+      {n:'DS链表',re:/单链表|头插|尾插|结点|struct|指针|双链表|循环链表/},
+      {n:'DS栈与队列',re:/栈|队列|括号匹配|循环队列|链栈|共享栈/},
+      {n:'DS树与图',re:/树|二叉树|遍历|先序|中序|后序|层序|非递归|图|BFS|DFS|邻接|Prim|Dijkstra|Kruskal|Floyd/},
+      {n:'DS查找排序',re:/查找|排序|哈希|散列|折半|插入排序|希尔|冒泡|快速|堆|归并|partition/},
+      {n:'计组',re:/计组|CO|冯诺依曼|进制|原码|补码|浮点|存储|SRAM|DRAM|Cache|虚拟存储|指令|寻址|数据通路|控制器/},
+      {n:'操作系统',re:/OS|操作系统|中断|系统调用|进程|PCB|处理机调度|信号量|PV|死锁|内存|分页|分段|页面置换|FIFO|LRU|文件管理|FCB|设备|SPOOLing/},
+      {n:'计网',re:/计网|CN|OSI|TCP|物理层|链路层|CSMA|交换机|IP地址|子网|路由|RIP|OSPF|NAT|传输层|UDP|拥塞控制|DNS|HTTP/},
+      {n:'408真题',re:/408真题|四科|王道四|代码终检|跨科串联|首轮完成/},
+    ],
+    en:[
+      {n:'墨墨背单词',re:/墨墨/},
+      {n:'黄皮书真题',re:/黄皮书|真题/},
+    ],
+    pol:[
+      {n:'徐涛',re:/徐涛/},
+      {n:'肖1000',re:/肖/},
+    ]
+  };
+  const subKeys = {math:1,'408':2,en:3,pol:4};
+  const subStyles = {math:'math','408':'408',en:'en',pol:'pol'};
+  for(const [sub,col] of Object.entries(subKeys)){
+    const allCb = document.querySelectorAll('input[id$="_'+col+'"]');
+    const chMap = {};
     allCb.forEach(cb=>{
-      const wid = cb.id.match(/^w(\d+)/)[1];
-      if(!weeksMap[wid]) weeksMap[wid] = {total:0, done:0};
-      weeksMap[wid].total++;
-      if(cb.checked) weeksMap[wid].done++;
+      const txt = cb.nextElementSibling.querySelector('.task-text').textContent;
+      const ch = chapters[sub].find(c=>c.re.test(txt));
+      if(!ch) return;
+      if(!chMap[ch.n]) chMap[ch.n] = {total:0,done:0};
+      chMap[ch.n].total++;
+      if(cb.checked) chMap[ch.n].done++;
     });
-    const totalWeeks = Object.keys(weeksMap).length;
-    let doneWeeks = 0;
-    for(const w of Object.values(weeksMap)){
-      if(w.done === w.total) doneWeeks++;
+    const totalCh = Object.keys(chMap).length;
+    let doneCh = 0;
+    for(const v of Object.values(chMap)){
+      if(v.total>0 && v.done===v.total) doneCh++;
     }
-    const subPct = totalWeeks ? Math.round(doneWeeks/totalWeeks*100) : 0;
-    document.getElementById('pct-'+s.id).textContent = subPct+'%';
-    document.getElementById('cnt-'+s.id).textContent = doneWeeks+'/'+totalWeeks+'周';
-    document.getElementById('ring-'+s.id).style.strokeDashoffset = C - (C*subPct/100);
+    const subPct = totalCh ? Math.round(doneCh/totalCh*100) : 0;
+    const sid = subStyles[sub];
+    document.getElementById('pct-'+sid).textContent = subPct+'%';
+    document.getElementById('cnt-'+sid).textContent = doneCh+'/'+totalCh+'章';
+    document.getElementById('ring-'+sid).style.strokeDashoffset = C - (C*subPct/100);
   }
 
   const rem = document.getElementById('reminder');
