@@ -148,11 +148,22 @@ const quotes = [
   {t:"在尘埃落定前奋力一搏。",a:"——"},
 ];
 let qi = -1;
-function nextQuote(){
-  qi = (qi+1) % quotes.length;
-  const q = quotes[qi];
+const HITOKOTO = 'https://v1.hitokoto.cn/?c=a&c=b&c=c&c=d&c=e&c=f&c=h&c=i&c=j&c=k';
+async function fetchHitokoto(){
+  try{
+    const res = await fetch(HITOKOTO);
+    const data = await res.json();
+    return {t:data.hitokoto, a:data.from||'一言'};
+  }catch(e){ return null; }
+}
+async function nextQuote(){
   const el = document.getElementById('quote');
   el.style.opacity = '0';
+  let q = await fetchHitokoto();
+  if(!q){
+    qi = (qi+1) % quotes.length;
+    q = quotes[qi];
+  }
   setTimeout(()=>{
     document.getElementById('quote-text').textContent = '"'+q.t+'"';
     document.getElementById('quote-author').textContent = '—— '+q.a;
@@ -160,7 +171,7 @@ function nextQuote(){
   }, 400);
 }
 nextQuote();
-setInterval(nextQuote, 15000);
+setInterval(nextQuote, 20000);
 
 // ============ 日期：5/6(三)起 ============
 const START = new Date(2026,4,6);
