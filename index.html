@@ -464,12 +464,22 @@ function updateProgress(){
   const C = 238.76;
   const subs = {math:{col:1,id:'math',color:'var(--blue)'},'408':{col:2,id:'408',color:'var(--green)'},en:{col:3,id:'en',color:'var(--orange)'},pol:{col:4,id:'pol',color:'#f778ba'}};
   for(const [,s] of Object.entries(subs)){
-    const subAll = document.querySelectorAll('input[id$="_'+s.col+'"]');
-    const subDone = document.querySelectorAll('input[id$="_'+s.col+'"]:checked');
-    const subTotal = subAll.length, subCount = subDone.length;
-    const subPct = subTotal ? Math.round(subCount/subTotal*100) : 0;
+    const allCb = document.querySelectorAll('input[id$="_'+s.col+'"]');
+    const weeksMap = {};
+    allCb.forEach(cb=>{
+      const wid = cb.id.match(/^w(\d+)/)[1];
+      if(!weeksMap[wid]) weeksMap[wid] = {total:0, done:0};
+      weeksMap[wid].total++;
+      if(cb.checked) weeksMap[wid].done++;
+    });
+    const totalWeeks = Object.keys(weeksMap).length;
+    let doneWeeks = 0;
+    for(const w of Object.values(weeksMap)){
+      if(w.done === w.total) doneWeeks++;
+    }
+    const subPct = totalWeeks ? Math.round(doneWeeks/totalWeeks*100) : 0;
     document.getElementById('pct-'+s.id).textContent = subPct+'%';
-    document.getElementById('cnt-'+s.id).textContent = subCount+'/'+subTotal;
+    document.getElementById('cnt-'+s.id).textContent = doneWeeks+'/'+totalWeeks+'周';
     document.getElementById('ring-'+s.id).style.strokeDashoffset = C - (C*subPct/100);
   }
 
